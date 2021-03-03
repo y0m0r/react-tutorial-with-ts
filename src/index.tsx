@@ -22,8 +22,6 @@ const calculateWinner = (squares: Squares): string | null => {
     }
     return null;
 }
-
-
 type Input = "☦" | "🔵" | null;
 type Squares = Input[];
 
@@ -77,7 +75,6 @@ class Game extends React.Component<{}, IGameState> {
                     <Board
                         squares={current.squares}
                         onClick={(i: number) => this.handleClick(i)}
-                        xIsNext={this.state.xIsNext}
                     />
                 </div>
                 <div className="game-info">
@@ -119,38 +116,37 @@ class Game extends React.Component<{}, IGameState> {
 // Board ///////////////////////////////////////////////////////
 interface IBoardProps {
     squares: Squares;
-    xIsNext: boolean;
     onClick: (i: number) => void;
 }
 
+const Board: React.VFC<IBoardProps> = (props: IBoardProps) => {
 
-class Board extends React.Component<IBoardProps> {
-
-    renderSquare(i: number) {
-        return <Square value={this.props.squares[i]} onClick={() => this.props.onClick(i)}/>;
+    const renderSquare = (i: number) => {
+        return <Square value={props.squares[i]} onClick={() => props.onClick(i)}/>;
     }
 
-    render() {
-        return (
+    return (
+        <>
             <div>
                 <div className="board-row">
-                    {this.renderSquare(0)}
-                    {this.renderSquare(1)}
-                    {this.renderSquare(2)}
+                    {renderSquare(0)}
+                    {renderSquare(1)}
+                    {renderSquare(2)}
                 </div>
                 <div className="board-row">
-                    {this.renderSquare(3)}
-                    {this.renderSquare(4)}
-                    {this.renderSquare(5)}
+                    {renderSquare(3)}
+                    {renderSquare(4)}
+                    {renderSquare(5)}
                 </div>
                 <div className="board-row">
-                    {this.renderSquare(6)}
-                    {this.renderSquare(7)}
-                    {this.renderSquare(8)}
+                    {renderSquare(6)}
+                    {renderSquare(7)}
+                    {renderSquare(8)}
                 </div>
             </div>
-        );
-    }
+        </>
+
+    )
 
 }
 
