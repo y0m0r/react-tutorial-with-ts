@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 
@@ -26,55 +26,65 @@ type Input = "☦" | "🔵" | null;
 type Squares = Input[];
 
 // Game ///////////////////////////////////////////////////////
-interface IGameState {
-    history: { squares: Squares }[],
-    xIsNext: boolean;
-    stepNumber: number;
-}
+const Game: React.VFC = () => {
+    const [xIsNext, setXIsNext] = useState<boolean>(true);
+    const [history, setHistory] = useState<{ squares: Squares }[]>([
+        {
+            squares: Array(9).fill(null)
+        }
+    ]);
+    const [stepNumber, setStepNumber] = useState<number>(0);
 
-class Game extends React.Component<{}, IGameState> {
 
-    constructor(props: {}) {
-        super(props)
-        this.state = {
-            history: [{
-                squares: Array(9).fill(null),
-            }],
-            xIsNext: true,
-            stepNumber: 0
-        };
+    const handleClick = (i: number) => {
+        const newHistory = history.slice(0, stepNumber + 1);
+        const current = history[newHistory.length - 1];
+        const squares = current.squares.slice();
+        if (calculateWinner(squares) || squares[i]) {
+            return;
+        }
+        squares[i] = xIsNext ? '☦' : '🔵';
+        setHistory(newHistory.concat([{
+            squares: squares,
+        }]))
+        setStepNumber(newHistory.length)
+        setXIsNext(!xIsNext)
     }
 
-    render() {
-        const history = this.state.history;
-        const current = history[this.state.stepNumber];
-        const winner = calculateWinner(current.squares);
+    const jumpTo = (step: number) => {
+        setStepNumber(step)
+        setXIsNext((step % 2) === 0)
 
-        const moves = history.map((step, move) => {
-            const desc = move ?
-                'Go to move #' + move :
-                'Go to game start';
-            return (
-                <li key={move}>
-                    <button onClick={() => this.jumpTo(move)}>{desc}</button>
-                </li>
-            );
-        });
+    }
+    ///////////////////////
 
-
-        let status;
-        if (winner) {
-            status = 'Winner: ' + winner;
-        } else {
-            status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
-        }
-
+    const current = history[stepNumber]
+    const winner = calculateWinner(current.squares)
+    const moves = history.map((_squares, idx) => {
+        const desc = idx ?
+            'Go to move #' + idx :
+            'Go to game start';
         return (
+            <li key={idx}>
+                <button onClick={() => jumpTo(idx)}>{desc}</button>
+            </li>
+        );
+    });
+
+    let status;
+    if (winner) {
+        status = 'Winner: ' + winner;
+    } else {
+        status = 'Next player: ' + (xIsNext ? 'X' : 'O');
+    }
+
+    return (
+        <>
             <div className="game">
                 <div className="game-board">
                     <Board
                         squares={current.squares}
-                        onClick={(i: number) => this.handleClick(i)}
+                        onClick={(i: number) => handleClick(i)}
                     />
                 </div>
                 <div className="game-info">
@@ -82,33 +92,9 @@ class Game extends React.Component<{}, IGameState> {
                     <ol>{moves}</ol>
                 </div>
             </div>
-        );
-    }
+        </>
 
-    jumpTo(step: number) {
-        this.setState({
-            stepNumber: step,
-            xIsNext: (step % 2) === 0,
-        });
-    }
-
-    handleClick(i: number) {
-        const history = this.state.history.slice(0, this.state.stepNumber + 1);
-        const current = history[history.length - 1];
-        const squares = current.squares.slice();
-        if (calculateWinner(squares) || squares[i]) {
-            return;
-        }
-        squares[i] = this.state.xIsNext ? '☦' : '🔵';
-        this.setState({
-            history: history.concat([{
-                squares: squares,
-            }]),
-            stepNumber: history.length,
-            xIsNext: !this.state.xIsNext,
-        });
-
-    }
+    )
 
 }
 
